@@ -1991,6 +1991,29 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
     <div class="pane-content">
       <p style="font-size: 14px; color: var(--text-faint); margin-bottom: 16px;">📒 Out-of-scope work done outside the numbered sessions. Why this exists: the numbered sessions assume a working prod deploy + in-sync archive + stable infra. The 2026-04-25 reconciliation found those assumptions were not met, which triggered a cascade of unplanned fixes. Logging here so future sessions can see the full history. Going forward, entries include <code>HH:MM</code> alongside the date.</p>
 
+      <div class="tile" id="cl-2026-04-25-r1-04-shipped" data-anchor data-anchor-label="🚀 R1-04 shipped: HTML rendering layer + base layout">
+        <div class="tile-date">2026-04-25 ~21:21 UTC</div>
+        <h2>🚀 R1-04 shipped: HTML rendering layer + base layout</h2>
+        <p><strong>Increment:</strong> Pedro now opens <code>/</code> in a browser and sees an auth-gated, server-rendered landing page listing the five archive buckets (records / writing / raw / source-files / sessions). Sign in via the new <code>/login</code> form (posts to the existing <code>/auth/login</code> over fetch, lands on <code>/</code> on success); the footer shows your email + <code>BUILD_VERSION</code>. The auth middleware was already redirecting browsers to <code>/login</code>; this session makes that destination exist. Stack stays minimal — EJS only, no <code>express-ejs-layouts</code>, no Tailwind, no MUI. One ~95-line stylesheet at <code>/_/runbook.css</code>.</p>
+        <p><strong>Trade-offs accepted:</strong></p>
+        <ul>
+          <li>Login form uses 18 lines of inline JS to keep the existing JSON <code>/auth/login</code> contract untouched. A JS-free urlencoded form post is a follow-up if a no-JS fallback is wanted later.</li>
+          <li>Bucket links on <code>/</code> currently fall through to the new HTML 404 when signed in — that's the intended end state until R1-05 lands the per-bucket index handlers. Anonymous visits still get the auth-gate redirect to <code>/login</code>.</li>
+          <li>Single base layout emulated via a tiny <code>renderPage()</code> two-pass helper (page → layout) instead of pulling in <code>express-ejs-layouts</code>. One less dep; same UX.</li>
+        </ul>
+        <p><strong>PRs:</strong> <a href="https://github.com/apcanario/pcblueprint-api/pull/25"><code>pcblueprint-api#25</code></a> (squash-merged at <code>008d221</code>) + <a href="https://github.com/apcanario/pcblueprint-api/pull/26"><code>pcblueprint-api#26</code></a> (docs-only CHANGELOG follow-up, awaiting approval).</p>
+        <p><strong>Downstream-impact triage (from the closing api session, applied here):</strong></p>
+        <ul>
+          <li><code>R1-02</code> — Login Form + Password Reset: <strong>scope partially absorbed by R1-04.</strong> R1-04 already shipped a working <code>GET /login</code> rendering an EJS form with email + password fields posting to <code>/auth/login</code>. R1-02 should be re-scoped to focus on the password-reset flow (the actual unmet need): <code>POST /auth/forgot</code> (Resend email), <code>GET /auth/reset/:token</code> (renders reset form using <code>renderPage()</code>), <code>POST /auth/reset/:token</code>, plus form polish (server-side error rendering instead of inline JS, "forgot your password?" link on <code>/login</code>). Recommendation: <strong>update R1-02 prompt</strong> — narrow scope to reset + polish, since the form ships.</li>
+          <li><code>R1-03</code> — Account Settings UI + 2FA + Rate Limiting: <strong>no scope change.</strong> R1-04 gave it the rendering scaffold (<code>renderPage()</code> + <code>_layout.ejs</code> nav slot). R1-03 just plugs settings views into the layout.</li>
+          <li><code>R1-05</code> — Archive index pages (one route per top-level bucket): <strong>no scope change; one note.</strong> The bucket links and the EJS scaffold already exist on <code>/</code>; R1-05 only needs to add the route handlers + per-bucket index templates. Recommendation: <strong>add a "scaffold already exists — see <code>src/views/render.ts</code> + <code>_layout.ejs</code>" reuse note</strong> to the R1-05 prompt so it doesn't redo the layout work.</li>
+          <li><code>R1-06</code> — Record detail pages: <strong>no scope change.</strong> Same scaffold reuse as R1-05.</li>
+          <li><code>R1-08</code> — Public deploy: <strong>scope addition needed.</strong> R1-04 added a <code>BUILD_VERSION</code> env var (defaults to <code>dev</code>) shown in the rendered footer. R1-08 must wire <code>BUILD_VERSION</code> into <code>compose.yaml</code> on the NAS (probably from the GitHub Actions image tag or a build arg). Recommendation: <strong>add a <code>BUILD_VERSION</code> bullet</strong> to R1-08 alongside the existing <code>AUTH_DB_PATH</code> volume-mount note.</li>
+          <li><code>R1-09</code> — Observability: no change.</li>
+        </ul>
+        <p><strong>Closing checklist split:</strong> the api session opened PR #26 with the <code>### Increment</code> entry in <code>pcblueprint-api/CHANGELOG.md</code> (api-side step). This tile + the <code>COMPLETED_SESSIONS</code> bump + the recommended R1-02 / R1-05 / R1-08 prompt edits are the meta-side step. Second R1 session shipped — the chain keeps moving.</p>
+      </div>
+
       <div class="tile" id="cl-2026-04-25-r1-01-shipped" data-anchor data-anchor-label="🚀 R1-01 shipped: auth foundation lands">
         <div class="tile-date">2026-04-25 ~19:53 UTC</div>
         <h2>🚀 R1-01 shipped: auth foundation lands</h2>
@@ -2445,7 +2468,7 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
   //
   // S04f is marked complete to skip it from the active queue — it is deferred
   // to post-S12 cleanup (see its prompt).
-  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01"]
+  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04"]
     .reduce((acc, id) => { acc[id] = { done: true }; return acc; }, {});
 
   // ── Next-up recommendation ────────────────────────────────────────────
