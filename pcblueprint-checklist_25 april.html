@@ -190,6 +190,166 @@
   }
   .next-up-btn:hover { filter: brightness(1.15); }
 
+  /* Release tabs (Tasks pane) */
+  .release-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 24px;
+    padding: 6px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .release-tab {
+    flex: 1 1 auto;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 10px 14px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 13px;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 130px;
+  }
+
+  .release-tab:hover {
+    background: var(--bg-card);
+    color: var(--text);
+  }
+
+  .release-tab.active {
+    background: var(--bg-card);
+    border-color: var(--ready);
+    color: var(--text);
+  }
+
+  .release-tab .release-tab-id {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-weight: 600;
+    color: var(--ready);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  .release-tab.active .release-tab-id { color: var(--ready); }
+
+  .release-tab .release-tab-name {
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .release-tab .release-tab-count {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .release-tab.empty .release-tab-id { color: var(--text-faint); }
+
+  /* Recruiter summary (release outcome cards) */
+  #recruiterSummary {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 8px;
+  }
+
+  .release-summary-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left-width: 3px;
+    border-radius: 8px;
+    padding: 18px 22px;
+  }
+
+  .release-summary-card[data-rel-status="done"]    { border-left-color: var(--done); }
+  .release-summary-card[data-rel-status="active"]  { border-left-color: var(--ready); }
+  .release-summary-card[data-rel-status="pending"] { border-left-color: var(--text-faint); }
+  .release-summary-card[data-rel-status="planning"]{ border-left-color: var(--accent); }
+
+  .release-summary-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .release-summary-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .release-summary-title .rel-id {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--ready);
+    margin-right: 8px;
+  }
+
+  .release-summary-card[data-rel-status="done"] .release-summary-title .rel-id { color: var(--done); }
+  .release-summary-card[data-rel-status="planning"] .release-summary-title .rel-id { color: var(--accent); }
+
+  .release-summary-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .release-summary-card[data-rel-status="done"]    .release-summary-status { background: var(--done-dim); color: var(--done); }
+  .release-summary-card[data-rel-status="active"]  .release-summary-status { background: var(--ready-dim); color: var(--ready); }
+  .release-summary-card[data-rel-status="pending"] .release-summary-status { background: var(--bg-elevated); color: var(--text-faint); border: 1px solid var(--border); }
+  .release-summary-card[data-rel-status="planning"].release-summary-status,
+  .release-summary-card[data-rel-status="planning"] .release-summary-status { background: var(--accent-dim); color: var(--accent); }
+
+  .release-summary-outcome {
+    color: var(--text-dim);
+    line-height: 1.55;
+    margin: 6px 0 10px;
+  }
+
+  .release-summary-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--text-faint);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .release-summary-bar {
+    flex: 1 1 200px;
+    max-width: 320px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .release-summary-bar-fill {
+    height: 100%;
+    background: var(--done);
+    transition: width 0.3s;
+  }
+
+  .release-summary-card[data-rel-status="active"]   .release-summary-bar-fill { background: var(--ready); }
+  .release-summary-card[data-rel-status="planning"] .release-summary-bar-fill { background: var(--accent); }
+
   /* Recruiter-view banner */
   .recruiter-banner {
     flex: none;
@@ -1007,7 +1167,9 @@
         <strong>👋 How to use:</strong> Click a session card to open its full prompt, info, and mark-complete button. Sessions unlock automatically as prereqs are marked done.
       </div>
       <div id="nextUpBanner" class="next-up" hidden></div>
+      <div id="releaseTabs" class="release-tabs"></div>
       <div id="phases"></div>
+      <div id="recruiterSummary" hidden></div>
     </div>
   </section>
 
@@ -2195,7 +2357,20 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
 
   const STORAGE_KEY = "pcblueprint-runbook-state-v1";
   const RECRUITER_MODE_KEY = "pcblueprint-runbook-recruiter-mode-v1";
+  const ACTIVE_RELEASE_KEY = "pcblueprint-runbook-active-release-v1";
   let currentOpenId = null;
+
+  // ── Release plan (2026-04-25 pivot) ─────────────────────────────────────
+  // The 5-release framing for the project. Each session in SESSIONS carries a
+  // matching `release` field added by helpers/_restructure_releases.js.
+  const RELEASES = [
+    { id: "R0", name: "Foundation",            outcome: "Archive structure, API CRUD across health/medical/biography/sessions, sessions log canonicalised, prod sync with bidirectional NAS replication, observability + backup. The base everything else stands on." },
+    { id: "R1", name: "Private Archive Browser", outcome: "Read-only, server-rendered HTML directly from the API behind real auth (Argon2id + Resend) — no Next.js, no MUI, no Tailwind, default browser CSS only. Pedro logs in at a public URL and browses every archive bucket end-to-end." },
+    { id: "R2", name: "AI Chat over the archive", outcome: "Stateless WRITE / QUERY / EXPORT command interface layered on top of R1. Agent classifies intent, parses, dedupes, auto-tags, commits, and returns cited results — all from natural language." },
+    { id: "R3", name: "Visual Identity",        outcome: "Branding, typography, colour, charts. Tailwind-vs-Next.js call deferred to here so it's informed by real R1+R2 usage data instead of being pre-locked." },
+    { id: "R4", name: "Mobile + Offline",       outcome: "Responsive 375px viewport, drawer nav, optional PWA install + offline-read for the archive. Comes after R3 visual identity exists." },
+  ];
+  const RELEASE_ORDER = RELEASES.map(r => r.id);
 
   // ── Project completion record ────────────────────────────────────────────
   // The list of sessions that have actually shipped (PR merged, OR manual
@@ -2216,9 +2391,13 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
   //
   // Format: { id: <session id>, why: "<one short line — why this one>" }
   // Set id to null to hide the banner entirely.
+  // As of 2026-04-25 the Next-up widget AUTO-COMPUTES from getNextReadySession()
+  // (walks releases R0→R4 in order, picks first ready session). This object is
+  // only an OPTIONAL manual override: if `id` points at a session that's currently
+  // ready, it wins over the auto-pick. Set `id: null` to always use auto-pick.
   const NEXT_RECOMMENDED = {
-    id: "S07a",
-    why: "Quickest unblock — opens the whole website + chatbot frontend chain (~10 downstream sessions cascade off it).",
+    id: null,
+    why: "",
   };
 
   function isRecruiterMode() {
@@ -2272,16 +2451,196 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
     return SESSIONS.find(s => s.id === id);
   }
 
+  // ── Release helpers ──────────────────────────────────────────────────────
+  function getReleaseStats(state) {
+    // For each release, count done / total across all sessions tagged with that release.
+    const stats = {};
+    RELEASES.forEach(r => { stats[r.id] = { done: 0, total: 0, ready: 0, blocked: 0, waiting: 0 }; });
+    SESSIONS.forEach(s => {
+      const rel = s.release;
+      if (!rel || !stats[rel]) return;
+      stats[rel].total++;
+      const status = getStatus(s, state);
+      stats[rel][status] = (stats[rel][status] || 0) + 1;
+    });
+    return stats;
+  }
+
+  function getActiveRelease(state) {
+    // Persisted choice wins if valid.
+    const stored = localStorage.getItem(ACTIVE_RELEASE_KEY);
+    if (stored && RELEASE_ORDER.includes(stored)) {
+      const stats = getReleaseStats(state)[stored];
+      if (stats && stats.total > 0) return stored;
+    }
+    // Default: first release with at least one ready session.
+    const stats = getReleaseStats(state);
+    for (const id of RELEASE_ORDER) {
+      if (stats[id].ready > 0) return id;
+    }
+    // Fallback: first release with any non-done sessions.
+    for (const id of RELEASE_ORDER) {
+      if (stats[id].total > stats[id].done && stats[id].total > 0) return id;
+    }
+    // Final fallback: R0.
+    return "R0";
+  }
+
+  function setActiveRelease(id) {
+    localStorage.setItem(ACTIVE_RELEASE_KEY, id);
+  }
+
+  function renderReleaseTabs(state) {
+    const el = document.getElementById("releaseTabs");
+    if (!el) return;
+    const stats = getReleaseStats(state);
+    const active = getActiveRelease(state);
+    el.innerHTML = "";
+    RELEASES.forEach(r => {
+      const s = stats[r.id];
+      const empty = s.total === 0;
+      const btn = document.createElement("button");
+      btn.className = "release-tab" + (r.id === active ? " active" : "") + (empty ? " empty" : "");
+      btn.type = "button";
+      btn.dataset.release = r.id;
+      btn.innerHTML = `
+        <span class="release-tab-id">${r.id}</span>
+        <span class="release-tab-name">${escapeHtml(r.name)}</span>
+        <span class="release-tab-count">${empty ? "no sessions yet" : `${s.done}/${s.total} done`}</span>
+      `;
+      btn.onclick = () => {
+        setActiveRelease(r.id);
+        render();
+      };
+      el.appendChild(btn);
+    });
+  }
+
+  function getNextReadySession(state) {
+    // Walk releases in order; within a release, walk sessions in their natural
+    // SESSIONS-array order. Return the first ready session found.
+    for (const relId of RELEASE_ORDER) {
+      const ready = SESSIONS.filter(s => s.release === relId && getStatus(s, state) === "ready");
+      if (ready.length > 0) {
+        // Within the release, prefer the session with the fewest prereqs (most foundational).
+        ready.sort((a, b) => a.prereqs.length - b.prereqs.length || a.id.localeCompare(b.id));
+        return ready[0];
+      }
+    }
+    return null;
+  }
+
+  function renderRecruiterSummary() {
+    // In recruiter mode, show release-level outcome cards instead of the
+    // 52-row session grid. Uses REAL completion record (COMPLETED_SESSIONS),
+    // ignoring localStorage in-flight toggles — recruiters see the true state.
+    const realState = Object.assign({}, COMPLETED_SESSIONS);
+    const stats = getReleaseStats(realState);
+    const summary = document.getElementById("recruiterSummary");
+    const tabs = document.getElementById("releaseTabs");
+    const phasesEl = document.getElementById("phases");
+    if (!summary) return;
+    tabs.hidden = true;
+    phasesEl.hidden = true;
+    summary.hidden = false;
+    summary.innerHTML = "";
+
+    RELEASES.forEach(r => {
+      const s = stats[r.id];
+      let relStatus, statusLabel;
+      if (s.total === 0) { relStatus = "planning"; statusLabel = "To be planned"; }
+      else if (s.done === s.total) { relStatus = "done"; statusLabel = "Shipped"; }
+      else if (s.done > 0 || s.ready > 0) { relStatus = "active"; statusLabel = s.done > 0 ? "In progress" : "Ready to start"; }
+      else { relStatus = "pending"; statusLabel = "Pending"; }
+
+      const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
+      const card = document.createElement("article");
+      card.className = "release-summary-card";
+      card.dataset.relStatus = relStatus;
+      const countText = s.total === 0
+        ? `<span>No sessions yet — defined at ${r.id} kickoff</span>`
+        : `<span>${s.done}/${s.total} sessions · ${pct}% complete</span>
+           <div class="release-summary-bar"><div class="release-summary-bar-fill" style="width: ${pct}%"></div></div>`;
+      card.innerHTML = `
+        <div class="release-summary-head">
+          <div class="release-summary-title"><span class="rel-id">${r.id}</span>${escapeHtml(r.name)}</div>
+          <span class="release-summary-status">${statusLabel}</span>
+        </div>
+        <p class="release-summary-outcome">${escapeHtml(r.outcome)}</p>
+        <div class="release-summary-meta">${countText}</div>
+      `;
+      summary.appendChild(card);
+    });
+
+    // Stats bar: show total project completion across all releases.
+    const totalDone = SESSIONS.filter(s => realState[s.id]?.done).length;
+    const totalSessions = SESSIONS.length;
+    const totalPct = (totalDone / totalSessions) * 100;
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    if (progressFill) progressFill.style.width = totalPct + "%";
+    if (progressText) progressText.textContent = `${totalDone} of ${totalSessions}`;
+    const doneCountEl = document.getElementById("doneCount");
+    const readyCountEl = document.getElementById("readyCount");
+    const blockedCountEl = document.getElementById("blockedCount");
+    const waitingCountEl = document.getElementById("waitingCount");
+    if (doneCountEl) doneCountEl.textContent = totalDone;
+    let r2 = 0, b2 = 0, w2 = 0;
+    SESSIONS.forEach(s => {
+      const st = getStatus(s, realState);
+      if (st === "ready") r2++;
+      else if (st === "blocked") b2++;
+      else if (st === "waiting") w2++;
+    });
+    if (readyCountEl) readyCountEl.textContent = r2;
+    if (blockedCountEl) blockedCountEl.textContent = b2;
+    if (waitingCountEl) waitingCountEl.textContent = w2;
+
+    // Hide the Next-up banner in recruiter view (it's a working-mode element).
+    const banner = document.getElementById("nextUpBanner");
+    if (banner) banner.hidden = true;
+
+    // Refresh sidebar for the recruiter summary (replace phase anchors with release anchors).
+    if (typeof window._buildSidebar === "function" &&
+        document.querySelector('.tab.active')?.dataset.tab === "tasks") {
+      // Add data-anchor to each summary card so the sidebar surfaces them.
+      summary.querySelectorAll(".release-summary-card").forEach((card, i) => {
+        const r = RELEASES[i];
+        card.dataset.anchor = "";
+        card.dataset.anchorLabel = `${r.id} — ${r.name}`;
+        card.id = `release-summary-${r.id}`;
+      });
+      requestAnimationFrame(() => window._buildSidebar("tasks"));
+    }
+  }
+
   function render() {
     const state = loadState();
-    const phases = {};
 
+    // Recruiter mode: show release-level outcome cards instead of the session grid.
+    if (isRecruiterMode()) {
+      renderRecruiterSummary();
+      return;
+    }
+
+    // Normal mode: show release tabs + phase grid filtered by active release.
+    const summary = document.getElementById("recruiterSummary");
+    const tabs = document.getElementById("releaseTabs");
+    const phasesEl = document.getElementById("phases");
+    if (summary) { summary.hidden = true; summary.innerHTML = ""; }
+    if (tabs) tabs.hidden = false;
+    if (phasesEl) phasesEl.hidden = false;
+
+    renderReleaseTabs(state);
+    const activeRelease = getActiveRelease(state);
+
+    const phases = {};
     SESSIONS.forEach(s => {
+      if (s.release !== activeRelease) return;
       if (!phases[s.phase]) phases[s.phase] = [];
       phases[s.phase].push(s);
     });
 
-    const phasesEl = document.getElementById("phases");
     phasesEl.innerHTML = "";
 
     Object.entries(phases).forEach(([phase, sessions]) => {
@@ -2393,27 +2752,36 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
   function updateNextUpBanner(state) {
     const banner = document.getElementById("nextUpBanner");
     if (!banner) return;
-    if (isRecruiterMode() || !NEXT_RECOMMENDED || !NEXT_RECOMMENDED.id) {
+    if (isRecruiterMode()) {
       banner.hidden = true;
       return;
     }
-    const session = findSession(NEXT_RECOMMENDED.id);
-    if (!session) { banner.hidden = true; return; }
-    const status = getStatus(session, state);
-    if (status === "done") { banner.hidden = true; return; }
 
-    const statusNote = status === "ready"
-      ? ""
-      : status === "waiting"
-        ? ` <span style="color: var(--waiting);">⏳ currently waiting</span>`
-        : status === "blocked"
-          ? ` <span style="color: var(--text-faint);">⚠ currently blocked</span>`
-          : "";
+    // Manual override (NEXT_RECOMMENDED) wins if it points at a real, ready session.
+    let session = null;
+    let why = "";
+    if (NEXT_RECOMMENDED && NEXT_RECOMMENDED.id) {
+      const pinned = findSession(NEXT_RECOMMENDED.id);
+      if (pinned && getStatus(pinned, state) === "ready") {
+        session = pinned;
+        why = NEXT_RECOMMENDED.why || "";
+      }
+    }
+
+    // Otherwise auto-compute: walk releases in order, return first ready session.
+    if (!session) {
+      session = getNextReadySession(state);
+      if (session) {
+        why = `Auto-selected as the next ready session in ${session.release} (${RELEASES.find(r => r.id === session.release)?.name || session.release}).`;
+      }
+    }
+
+    if (!session) { banner.hidden = true; return; }
 
     banner.innerHTML = `
       <div class="next-up-text">
-        <strong>👉 Next up:</strong> <span class="next-up-id">${session.id}</span> — ${escapeHtml(session.title)} · ~${session.time} min${statusNote}
-        <span class="next-up-why">${escapeHtml(NEXT_RECOMMENDED.why)}</span>
+        <strong>👉 Next ready:</strong> <span class="next-up-id">${session.id}</span> — ${escapeHtml(session.title)} · ~${session.time} min · <span style="color: var(--text-faint); font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px;">${session.release}</span>
+        <span class="next-up-why">${escapeHtml(why)}</span>
       </div>
       <button class="next-up-btn" onclick="openModal('${session.id}')">Open ${session.id}</button>
     `;
@@ -2555,7 +2923,7 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
       showToast("Already in recruiter view");
       return;
     }
-    if (!confirm("Switch to recruiter view? The project's completion record + your in-flight UI toggles are hidden. Both are preserved and you can restore any time from the banner or the ⚙️ menu.")) return;
+    if (!confirm("Switch to recruiter view? The 52-row session grid is replaced by a release-level outcome summary (R0–R4). Real completion is shown — recruiters see the project's actual progress at a glance. Restore any time from the banner or the ⚙️ menu.")) return;
     localStorage.setItem(RECRUITER_MODE_KEY, "1");
     closeModal();
     render();
