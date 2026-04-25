@@ -1,0 +1,56 @@
+name: Deploy runbook to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage site
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+
+          # Pick the most recently modified pcblueprint-checklist_*.html file as the live runbook.
+          # Filename pattern is "pcblueprint-checklist_<date>.html" where <date> can contain spaces.
+          latest="$(ls -t pcblueprint-checklist_*.html 2>/dev/null | head -n 1 || true)"
+          if [ -z "${latest}" ]; then
+            echo "ERROR: no pcblueprint-checklist_*.html file found at repo root" >&2
+            exit 1
+          fi
+          echo "Publishing: ${latest}"
+          cp -- "${latest}" _site/index.html
+
+          # Also publish the prompts mirror so deep links keep working.
+          if [ -f prompts_line.txt ]; then
+            cp prompts_line.txt _site/prompts_line.txt
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

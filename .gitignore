@@ -1,0 +1,22 @@
+# Machine-local Claude Code config
+.claude/
+
+# Node (helpers/ is plain JS, no install needed, but be defensive)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor noise
+.vscode/
+.idea/
+*.swp
+*~
+
+# Runbook scratchpads / experiments — keep the dated HTML files tracked, ignore unsorted
+unknown use files/
