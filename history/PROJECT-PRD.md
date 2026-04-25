@@ -20,13 +20,14 @@ A private, web-accessible system for one person (Pedro Canário) to **store, bro
 | Repo | Role |
 |---|---|
 | `pcblueprint-archive` | Source of truth. Markdown + JSON files in lifecycle buckets (`records/`, `writing/`, `source-files/`, `_legacy/`, etc.). Every write is a git commit. |
-| `pcblueprint-api` | Express/TypeScript api over the archive. Mounts at `/health`, `/biography`, `/blueprint`, `/identity`, `/timeline`, `/search`, `/archive`, `/chat` (planned). |
+| `pcblueprint-api` | Express/TypeScript api over the archive. Mounts at `/health`, `/biography`, `/blueprint`, `/identity`, `/timeline`, `/search`, `/archive`, `/chat` (planned). **As of R1 (2026-04-25): also serves the user-facing HTML pages directly via EJS — no separate frontend until R3.** |
 | `pcblueprint-sync` | Docker cron worker. Pulls from Zepp + Strava, posts to api ingest endpoints. |
-| `pcblueprint-website` | Next.js 16 (App Router). The user-facing site. MUI + Tailwind + Emotion. |
+| `pcblueprint-meta` | Coordination repo (this PRD's home). Hosts the runbook HTML, helpers, and the GitHub Pages deploy of the runbook. New as of 2026-04-25. |
+| `pcblueprint-website` | *Originally:* Next.js 16 (App Router) with MUI + Tailwind + Emotion. **Status post-2026-04-25 release pivot:** dormant until R3 (Visual Identity), at which point a Tailwind-vs-Next.js call gets made with real R1+R2 usage data informing the choice. |
 
 ## Roadmap structure
 
-55 sessions across 20 epics (EPIC 0 is the pre-runbook foundation; EPICs 1–19 each map to a phase in the runbook HTML).
+**52 sessions across 5 releases (R0–R4)** — restructured 2026-04-25 from the prior 55-session flat list. R3 has no sessions yet (planned at R3 kickoff). EPIC 0 is the pre-runbook foundation; the historical EPIC 1–19 sections below remain for context, with dropped epics marked inline.
 
 ## Chat architecture (codified 2026-04-25)
 
@@ -38,6 +39,24 @@ The chatbot is **not** conversational. It is a **stateless natural-language task
 - **Cost ceilings** (3 layers): per-request (max_tokens + max-iterations + 60s timeout); app-level monthly budget guard refusing requests at 100% and warning at 80%; vendor-level prepaid credits + workspace spend cap.
 
 See memory `chat_architecture_three_verbs.md` for the full operational record.
+
+## Release plan (2026-04-25 pivot)
+
+The prior 55-session flat arc was "everything, everywhere, all at once": Next.js + MUI + Tailwind + Emotion + custom auth + mobile responsiveness all interleaved with no shippable intermediate before ~S20. The 2026-04-25 pivot replaces that with five releases under a strict "default styling first, dazzle last" discipline.
+
+| Release | Goal | Sessions |
+|---|---|---|
+| **R0 — Foundation** *(largely done)* | Archive structure, API CRUD, sessions log, prod sync. | S00–S06f, S16a, S16b |
+| **R1 — Private Archive Browser** | Read-only, server-rendered HTML directly from the API, default browser CSS only, real auth (Argon2id + Resend) from day one. No Next.js, no MUI, no Tailwind. | R1-01 (auth core, was S20a), R1-02 (auth UX, was S20b), R1-03 (auth hardening, was S20c), R1-04 (HTML rendering layer), R1-05 (index pages), R1-06 (detail pages), R1-07 (search/filter), R1-08 (public deploy, replaces S18a/b), R1-09 (observability minimum) |
+| **R2 — AI Chat over the archive** | Stateless WRITE / QUERY / EXPORT command interface. Same default-CSS philosophy — `<form>` posting to `/chat`, results rendered server-side, vanilla-JS SSE. No React. | S10a–d, S11a–c (rewritten — replace React panel with EJS), S12, S13a–b, S14a–c, S15a–b |
+| **R3 — Visual Identity** *(no sessions yet)* | Branding, typography, color, charts. Tailwind-vs-Next.js call made here with real usage data informing the choice. | TBD — planned at R3 kickoff |
+| **R4 — Mobile + Offline** *(blocked on R3 planning)* | Responsive 375px viewport, drawer, optional PWA install + offline-read. | S19a, S19b, S19c |
+
+**Sessions dropped (Next.js+MUI scaffolding superseded by R1-04..R1-07):** EPIC 7 (S07a, S07b), EPIC 8 (S08a, S08b, S08c), EPIC 9 (S09a, S09b). Their per-EPIC sections below stay for historical record but are flagged DROPPED.
+
+**Sessions folded:** EPIC 17 (S18a, S18b — original Vercel website deploy + DNS) → folded into R1-08 (single deploy of the API+HTML unit on Cloudflare tunnel or Fly.io).
+
+**Sessions moved:** EPIC 19 (S20a–c — Auth Hardening) → pulled forward to R1 as R1-01..R1-03; archive is private from first public deploy, no APP_PASSWORD-only window.
 
 ---
 
@@ -217,7 +236,9 @@ Production deploy is *actually* stable end-to-end: the api on the NAS bidirectio
 
 ---
 
-# EPIC 7 — Website Homepage (S07a–b)
+# EPIC 7 — Website Homepage (S07a–b) — ❌ DROPPED 2026-04-25
+**Release pivot:** superseded by R1-04 (API HTML rendering layer) + R1-05 (archive index pages). Original Next.js/MUI scaffolding no longer needed under the server-rendered approach. Section retained below for historical reference.
+
 **Phase:** Website — Homepage · **Status:** 🟡 Planned · **Sessions:** S07a, S07b
 
 ### Outcome
@@ -236,7 +257,9 @@ Replace the current dashboard-first homepage with a chat-first homepage that has
 
 ---
 
-# EPIC 8 — Website Archive Docs (S08a–c)
+# EPIC 8 — Website Archive Docs (S08a–c) — ❌ DROPPED 2026-04-25
+**Release pivot:** superseded by R1-05 (archive index pages) + R1-06 (record detail pages). The "docs-shell + manifest sidebar + tiled landing" pattern collapses into plain semantic HTML lists rendered server-side; no React, no client-side data fetching. Section retained below for historical reference.
+
 **Phase:** Website — Archive Docs · **Status:** 🟡 Planned · **Sessions:** S08a, S08b, S08c
 
 ### Outcome
@@ -255,7 +278,9 @@ A polished docs-site experience for browsing the archive: persistent collapsible
 
 ---
 
-# EPIC 9 — Website Activity Detail (S09a–b)
+# EPIC 9 — Website Activity Detail (S09a–b) — ❌ DROPPED 2026-04-25
+**Release pivot:** the per-workout hero + HRZones + Splits + Pace/Effort cards depend on MUI X Charts and a styled component layer that are explicitly deferred to R3 (Visual Identity). For R1, activity records render via the same generic detail-page template (R1-06) as everything else — tabular data, no charts. Charts are reintroduced in R3 with whatever stack R3 picks. Section retained below for historical reference.
+
 **Phase:** Website — Activity Detail · **Status:** 🟡 Planned · **Sessions:** S09a, S09b
 
 ### Outcome
@@ -460,7 +485,9 @@ Failures stop being silent. The api alerts on push/pull errors via the same webh
 
 ---
 
-# EPIC 17 — Public Deployment (S18a–b) — *new*
+# EPIC 17 — Public Deployment (S18a–b) — 🔁 FOLDED 2026-04-25 → R1-08
+**Release pivot:** under R1, the archive HTML lives inside the API (server-rendered EJS), so deploying "the website" and "the API" is one operation, not two. S18a (Vercel website deploy) + S18b (DNS / custom domain) collapse into a single R1-08 (Public deploy — Cloudflare tunnel or Fly.io, with custom domain inline). Section retained below for the original framing.
+
 **Phase:** Production — Public Deploy · **Status:** 🟡 Planned · **Hard prereq:** EPIC 19 (Auth Hardening)
 
 ### Outcome
@@ -499,7 +526,9 @@ Every page works comfortably at 375px iPhone width. Sidebar collapses into a dra
 
 ---
 
-# EPIC 19 — Auth Hardening (S20a–c) — *new*
+# EPIC 19 — Auth Hardening (S20a–c) — 🔁 MOVED 2026-04-25 → R1-01..R1-03
+**Release pivot:** the original plan deferred auth to the very end of the arc (S20). The 2026-04-25 pivot pulls it forward — the archive is private from first public deploy, so auth gates everything before R1 ships. S20a→R1-01, S20b→R1-02, S20c→R1-03. Scope is unchanged; only the release tag and ID change. Section retained below for the original framing.
+
 **Phase:** Production — Auth Hardening · **Status:** 🟡 Planned · **Hard blocker:** EPIC 17 (Public Deploy)
 
 ### Outcome
