@@ -1991,6 +1991,30 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
     <div class="pane-content">
       <p style="font-size: 14px; color: var(--text-faint); margin-bottom: 16px;">📒 Out-of-scope work done outside the numbered sessions. Why this exists: the numbered sessions assume a working prod deploy + in-sync archive + stable infra. The 2026-04-25 reconciliation found those assumptions were not met, which triggered a cascade of unplanned fixes. Logging here so future sessions can see the full history. Going forward, entries include <code>HH:MM</code> alongside the date.</p>
 
+      <div class="tile" id="cl-2026-04-25-meta-arc-closed" data-anchor data-anchor-label="🎬 S-META arc closed: meta repo + release plan live">
+        <div class="tile-date">2026-04-25 ~22:00</div>
+        <h2>🎬 S-META arc closed: meta repo + release plan live</h2>
+        <p>End of the four-session meta arc that promoted the runbook to its own repo, restructured the work into R0–R4 releases, and added a release-grouped UI on top. From this point forward, "next pickup" is unambiguous (Next-ready widget surfaces it; default is <code>R1-01</code>).</p>
+        <p><strong>What shipped across S-META-01..04:</strong></p>
+        <ul>
+          <li><strong>S-META-01</strong> — <code>pcblueprint-meta</code> repo created at <a href="https://github.com/apcanario/pcblueprint-meta"><code>github.com/apcanario/pcblueprint-meta</code></a>; runbook deployed at <a href="https://apcanario.github.io/pcblueprint-meta/"><code>apcanario.github.io/pcblueprint-meta</code></a> via GitHub Pages workflow. Replaces the prior zip-and-transfer sync flow.</li>
+          <li><strong>S-META-02</strong> — runbook restructured under R0–R4. Idempotent helper <code>_restructure_releases.js</code>: dropped 9 Next.js+MUI scaffolding sessions, renamed S20a–c→R1-01..03 (auth pulled forward), added R1-04..R1-09 with full prompts, retagged everything else, rewrote affected prereqs. PRD updated. Subtitle bumped 55→52.</li>
+          <li><strong>S-META-03</strong> — UI rework. Release tabs at top of Tasks pane (R0/R1/R2/R3/R4 with done counts), filter the phase grid below. Next-ready widget auto-computes (walks releases R0→R4, picks first ready session). Recruiter view replaced with 5 release-level outcome cards showing real completion. Stale <code>NEXT_RECOMMENDED.id = "S07a"</code> cleared.</li>
+          <li><strong>S-META-04</strong> — polish. README updated with live URL, helper inventory, R0–R4 status table. Stale <code>helpers/prompts_line.txt</code> mirror removed (canonical lives at repo root). This closing tile.</li>
+        </ul>
+        <p><strong>Recommended next pickup:</strong> <code>R1-01</code> — Auth core (Argon2id + sqlite sessions + JWT cookies). It's the start of R1, gates the whole release, and is the session the Next-ready widget surfaces by default. ~60 min, single repo (<code>pcblueprint-website</code> in the prompt — though the actual implementation may move to <code>pcblueprint-api</code> under the R1 server-rendered approach; flag at session-time if a re-scope is needed).</p>
+        <p><strong>What's NOT done (deliberately deferred):</strong></p>
+        <ul>
+          <li><strong>R3 sessions</strong> — visual identity work is undefined. Decision waits for real R1+R2 usage data so the framework choice (Tailwind-on-EJS vs Next.js extraction) is informed, not pre-locked.</li>
+          <li><strong>Auto-fire on PR merge</strong> — the runbook doesn't yet auto-kick the next session when a PR merges. One-PR-per-session human checkpoint preserved per S01 rules. Future S-META if Pedro wants it.</li>
+          <li><strong>Recruiter-view drill-down</strong> — clicking a release card doesn't expand into its sessions yet. Flat outcome list is fine for a first cut.</li>
+          <li><strong>Sidebar heading</strong> — still says "Phases" in normal mode. Could become release-aware. Cosmetic, low priority.</li>
+          <li><strong>Pages action versions</strong> — pinned to current latest (<code>checkout@v4</code>, <code>upload-pages-artifact@v3</code>, <code>deploy-pages@v4</code>). Node-24-compatible bumps to be revisited around May 2026 before the June 2026 forced cutover.</li>
+        </ul>
+        <p><strong>PRs:</strong> none — three commits on <code>pcblueprint-meta</code> main: <code>21f0aee</code> (initial), <code>f6520e0</code> (S-META-02 restructure), <code>94f8cfd</code> (S-META-03 UI), plus this S-META-04 commit. All deployed via the auto-Pages workflow.</p>
+        <p><strong>Impact on tasks:</strong> none directly. Every numbered session retains its prompt content; only IDs / release tags / prereqs were rewritten. The R1-01..R1-09 prompts are fresh and ready to be picked up.</p>
+      </div>
+
       <div class="tile" id="cl-2026-04-25-meta-restructure" data-anchor data-anchor-label="🧱 Runbook restructured under R0–R4">
         <div class="tile-date">2026-04-25 ~21:00</div>
         <h2>🧱 Runbook restructured under R0–R4</h2>
