@@ -1991,6 +1991,31 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
     <div class="pane-content">
       <p style="font-size: 14px; color: var(--text-faint); margin-bottom: 16px;">📒 Out-of-scope work done outside the numbered sessions. Why this exists: the numbered sessions assume a working prod deploy + in-sync archive + stable infra. The 2026-04-25 reconciliation found those assumptions were not met, which triggered a cascade of unplanned fixes. Logging here so future sessions can see the full history. Going forward, entries include <code>HH:MM</code> alongside the date.</p>
 
+      <div class="tile" id="cl-2026-05-03-r1-03-shipped" data-anchor data-anchor-label="🚀 R1-03 shipped: account self-service + optional 2FA + rate limiting">
+        <div class="tile-date">2026-05-03 ~00:25 UTC</div>
+        <h2>🚀 R1-03 shipped: account self-service + optional 2FA + rate limiting</h2>
+        <p><strong>Increment:</strong> End-to-end self-service auth lands. <code>/account</code> shows email + last login, lets Pedro change his password (current required), see every active session with user-agent / IP / created / expires, revoke any individual session, or sign out everywhere else in one click while staying signed in here. 2FA is opt-in via TOTP — enable, scan a QR with any authenticator app, type the code once to confirm, and from then on every login asks for the 6-digit code after the password. Disable requires the current password. Brute-force surface is rate-limited end-to-end: 10 login attempts/min/IP across the combined <code>/login</code> + <code>/auth/login</code> + <code>/auth/login-2fa</code> bucket (so attackers can't sidestep by hopping endpoints), 3 reset-requests/IP/min plus 5/email/hour (so a rotating-IP attacker can't flood an inbox), 10 reset-completions/IP/min (token brute-force defence). 429 responses include <code>Retry-After</code>. Closes R1's auth track.</p>
+        <p><strong>Trade-offs accepted:</strong></p>
+        <ul>
+          <li>Pending TOTP secrets and pending login challenges live in process memory (10min and 5min TTL respectively). A server restart wipes in-flight enrollments + pending logins — acceptable for the single-process personal-use deploy; revisit if R1-08 ever scales horizontally.</li>
+          <li>Wrong code on 2FA verify re-renders the page <em>without</em> the QR (only the base32 setup key) — small UX nit, real defence against shoulder-surfing.</li>
+          <li>Wrong <code>/auth/login-2fa</code> code clears the pending cookie + 401s, forcing a fresh password attempt rather than allowing repeated 6-digit guesses with a stale token. Legitimate users just retype their password.</li>
+          <li><code>POST /auth/login</code>'s JSON contract is additively extended (<code>200 {ok:true, twofa_required:true}</code> + pending cookie when 2FA is enabled) — old callers ignoring the new field keep working unless they hit the 2FA-enabled user path.</li>
+          <li>New env vars are <code>DISABLE_RATE_LIMIT</code> (1 = skip limiters; local debugging only) and <code>ENABLE_RATE_LIMIT_FOR_TESTS</code> (1 = run limiters under <code>NODE_ENV=test</code>; the rate-limit test sets this). Production should leave both unset.</li>
+        </ul>
+        <p><strong>PRs:</strong> <a href="https://github.com/apcanario/pcblueprint-api/pull/29"><code>pcblueprint-api#29</code></a> (chore: Windows hook paths + .gitignore — pre-flight infra fix, squash-merged at <code>1e8cfba</code>), <a href="https://github.com/apcanario/pcblueprint-api/pull/30"><code>pcblueprint-api#30</code></a> (the implementation, squash-merged at <code>c248bb4</code>) + the docs(changelog) follow-up PR opening alongside this tile.</p>
+        <p><strong>Downstream-impact triage:</strong></p>
+        <ul>
+          <li><code>R1-05</code> — Archive index pages: no change. Pure rendering on top of R1-04, doesn't touch auth.</li>
+          <li><code>R1-06</code> — Record detail pages: no change.</li>
+          <li><code>R1-07</code> — Search + tag filter: no change.</li>
+          <li><code>R1-08</code> — Public deploy: <strong>small scope addition.</strong> Three new env vars to document in <code>compose.yaml</code>: <code>DISABLE_RATE_LIMIT</code> (leave UNSET in prod — the limiters are the whole point), <code>ENABLE_RATE_LIMIT_FOR_TESTS</code> (test-only, never set in prod), and a brief note that <code>NODE_ENV=production</code> already correctly enables the rate limiters. No new secrets — TOTP secrets are user-data persisted in <code>users.totp_secret</code>, not config. Recommendation: <strong>add a one-line bullet</strong> to R1-08's prompt covering this.</li>
+          <li><code>R1-09</code> — Observability: <strong>worth considering.</strong> The new 429 responses on the auth surface are exactly the kind of signal a brute-force attempt would create — worth surfacing in whatever logging/metrics R1-09 lands. Recommendation: <strong>note as a "nice-to-have"</strong> in R1-09's prompt; not a blocker for the session.</li>
+        </ul>
+        <p><strong>First auto-mode session:</strong> R1-03 is the first session with Pedro babysitting Claude through the babysit-then-auto pattern. Phase A (this session) ran with full visibility / per-step approval; Phase B (R1-05 → R1-06 → R1-07) is about to start unattended with auto-merge on green CI.</p>
+        <p><strong>Closing checklist split:</strong> the api session opened the docs(changelog) PR with the <code>### Increment</code> entry in <code>pcblueprint-api/CHANGELOG.md</code> (api-side step). This tile + the <code>COMPLETED_SESSIONS</code> bump are the meta-side step. Auth release done — Phase B kicks off rendering work.</p>
+      </div>
+
       <div class="tile" id="cl-2026-04-25-r1-02-shipped" data-anchor data-anchor-label="🚀 R1-02 shipped: login form polish + password reset (Resend)">
         <div class="tile-date">2026-04-25 ~21:54 UTC</div>
         <h2>🚀 R1-02 shipped: login form polish + password reset (Resend)</h2>
@@ -2492,7 +2517,7 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
   //
   // S04f is marked complete to skip it from the active queue — it is deferred
   // to post-S12 cleanup (see its prompt).
-  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04","R1-02"]
+  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04","R1-02","R1-03"]
     .reduce((acc, id) => { acc[id] = { done: true }; return acc; }, {});
 
   // ── Next-up recommendation ────────────────────────────────────────────
