@@ -1991,6 +1991,28 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
     <div class="pane-content">
       <p style="font-size: 14px; color: var(--text-faint); margin-bottom: 16px;">📒 Out-of-scope work done outside the numbered sessions. Why this exists: the numbered sessions assume a working prod deploy + in-sync archive + stable infra. The 2026-04-25 reconciliation found those assumptions were not met, which triggered a cascade of unplanned fixes. Logging here so future sessions can see the full history. Going forward, entries include <code>HH:MM</code> alongside the date.</p>
 
+      <div class="tile" id="cl-2026-05-03-r1-05-shipped" data-anchor data-anchor-label="🚀 R1-05 shipped: archive index pages (records / writing / raw / source-files / sessions)">
+        <div class="tile-date">2026-05-03 ~00:34 UTC</div>
+        <h2>🚀 R1-05 shipped: archive index pages</h2>
+        <p><strong>Increment:</strong> The five top-level archive buckets are navigable. Pedro signs in, lands on <code>/</code>, clicks any of <code>records</code> / <code>writing</code> / <code>raw</code> / <code>source-files</code> / <code>sessions</code>, and sees real archive data — blueprint versions, medical summary + notes, blood-pressure months, workouts, journal <code>##</code> entries, memoirs / biography / identity / career markdown files, raw workout streams, original PDFs / images / GPX exports grouped by domain, and the AI session log newest-first. Plain HTML throughout (view-source has zero JS), inherits R1-04's <code>_layout.ejs</code> header + auth-gated nav + footer.</p>
+        <p><strong>Trade-offs accepted:</strong></p>
+        <ul>
+          <li>Detail-page hrefs are placeholders (<code>#</code>); R1-06 fills them in. Clicking a list item today is a no-op.</li>
+          <li>Lists are capped at 25/group (100 for raw + sessions). A "show all" affordance is a follow-up — the cap exists so a multi-thousand-row archive renders quickly.</li>
+          <li>Reads are not memoised — every page hit re-stats the archive. Fine for personal-use traffic; revisit if R1-08's public deploy ever sees real load.</li>
+          <li>One shared template (<code>archive-index.ejs</code>) renders all five pages off a uniform <code>{ label, items[{ label, href, detail? }] }[]</code> shape. Per-bucket presentation tweaks live in <code>bucketReaders.ts</code>, not in EJS.</li>
+        </ul>
+        <p><strong>PR:</strong> <a href="https://github.com/apcanario/pcblueprint-api/pull/32"><code>pcblueprint-api#32</code></a> (squash-merged at <code>2026-05-03 00:33 UTC</code>) + the docs(changelog) follow-up PR opening alongside this tile.</p>
+        <p><strong>Downstream-impact triage:</strong></p>
+        <ul>
+          <li><code>R1-06</code> — Record detail pages: <strong>nav contract locked.</strong> R1-05's index pages link to <code>href: '#'</code> placeholders; R1-06 needs to (a) define the canonical detail URL per domain (the prompt already lists 15+ patterns) and (b) update <code>bucketReaders.ts</code> to point each item at the right URL. Recommendation: <strong>add a one-line bullet</strong> to R1-06's prompt: "after defining detail URLs, replace the <code>'#'</code> hrefs in <code>src/services/bucketReaders.ts</code>." No prompt rewrite needed.</li>
+          <li><code>R1-07</code> — Search + tag filter: no change. R1-05 only adds GET routes that read; search will layer on the same readers.</li>
+          <li><code>R1-08</code> — Public deploy: no change. No new env vars; the bucket reads use the existing <code>ARCHIVE_PATH</code>.</li>
+          <li><code>R1-09</code> — Observability: no change.</li>
+        </ul>
+        <p><strong>Phase B progress:</strong> auto-mode session 1/3. R1-06 starts immediately on top of this merge; R1-07 follows on top of R1-06. No human gates between Phase B sessions — auto-merge on green CI.</p>
+      </div>
+
       <div class="tile" id="cl-2026-05-03-r1-03-shipped" data-anchor data-anchor-label="🚀 R1-03 shipped: account self-service + optional 2FA + rate limiting">
         <div class="tile-date">2026-05-03 ~00:25 UTC</div>
         <h2>🚀 R1-03 shipped: account self-service + optional 2FA + rate limiting</h2>
@@ -2517,7 +2539,7 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
   //
   // S04f is marked complete to skip it from the active queue — it is deferred
   // to post-S12 cleanup (see its prompt).
-  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04","R1-02","R1-03"]
+  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04","R1-02","R1-03","R1-05"]
     .reduce((acc, id) => { acc[id] = { done: true }; return acc; }, {});
 
   // ── Next-up recommendation ────────────────────────────────────────────
