@@ -1991,6 +1991,28 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
     <div class="pane-content">
       <p style="font-size: 14px; color: var(--text-faint); margin-bottom: 16px;">📒 Out-of-scope work done outside the numbered sessions. Why this exists: the numbered sessions assume a working prod deploy + in-sync archive + stable infra. The 2026-04-25 reconciliation found those assumptions were not met, which triggered a cascade of unplanned fixes. Logging here so future sessions can see the full history. Going forward, entries include <code>HH:MM</code> alongside the date.</p>
 
+      <div class="tile" id="cl-2026-05-03-r1-06-shipped" data-anchor data-anchor-label="🚀 R1-06 shipped: per-record detail pages (markdown + tables + binary downloads)">
+        <div class="tile-date">2026-05-03 ~00:46 UTC</div>
+        <h2>🚀 R1-06 shipped: per-record detail pages</h2>
+        <p><strong>Increment:</strong> The index → detail loop is closed. Pedro clicks any list item on R1-05's bucket pages and lands on a real per-record page: blueprint versions / medical summary + notes / journal / memoirs / biography / identity / career rendered from markdown via <code>marked</code>; BP months as a readings table; workouts as an attribute table with an optional "View workout stream" link; raw streams with size + top-level keys + a 2 KB JSON preview; source files as metadata pages with a download link that streams the bytes (never inlines them); the full session log on one page. Tag chips on every detail page link to <code>/search?tag=&lt;tag&gt;</code> — R1-07's destination, currently a 404.</p>
+        <p><strong>Trade-offs accepted:</strong></p>
+        <ul>
+          <li>Source-file routes are domain-allow-listed (<code>medical</code> / <code>sports</code> / <code>writing</code>) and filename-sanitised (no <code>..</code>, no slashes, no backslashes, length ≤ 255, restricted character class). Adding a new legitimate source-file domain requires an explicit allow-list addition — intentional, not bug.</li>
+          <li>Source-file metadata pages don't stream HTML / image previews inline. Pedro clicks <code>Download</code>, the browser opens its own PDF / image viewer. Keeps the auth surface small (no proxy of arbitrary bytes through the rendering layer) at the cost of one extra click.</li>
+          <li>Tag extraction is a cheap regex against <code>tags_applied: [...]</code> lines — no YAML dep added. Fine for the current archive's front-matter shape.</li>
+          <li>Journal entries are sub-headings within one file rather than per-entry files, so all journal items in <code>/writing</code> link to the single <code>/writing/journal</code> page (no <code>#anchor</code> per entry yet).</li>
+          <li>Reads are still not memoised — every page hit re-stats the archive (fine for personal-use traffic).</li>
+        </ul>
+        <p><strong>PR:</strong> <a href="https://github.com/apcanario/pcblueprint-api/pull/34"><code>pcblueprint-api#34</code></a> (squash-merged at <code>2026-05-03 00:45 UTC</code>) + the docs(changelog) follow-up PR opening alongside this tile.</p>
+        <p><strong>Downstream-impact triage:</strong></p>
+        <ul>
+          <li><code>R1-07</code> — Search + tag filter: <strong>tag-link contract locked.</strong> R1-06 emits tag chips as <code>&lt;a href="/search?tag=&lt;tag&gt;"&gt;</code>. R1-07's prompt already specifies that exact URL shape, so this is a no-op confirmation: implement the destination, no upstream rewiring needed.</li>
+          <li><code>R1-08</code> — Public deploy: no change. No new env vars; <code>marked</code> is a runtime dep that lands automatically on <code>npm ci</code>.</li>
+          <li><code>R1-09</code> — Observability: no change.</li>
+        </ul>
+        <p><strong>Phase B progress:</strong> auto-mode session 2/3. R1-07 starts immediately on top of this merge.</p>
+      </div>
+
       <div class="tile" id="cl-2026-05-03-r1-05-shipped" data-anchor data-anchor-label="🚀 R1-05 shipped: archive index pages (records / writing / raw / source-files / sessions)">
         <div class="tile-date">2026-05-03 ~00:34 UTC</div>
         <h2>🚀 R1-05 shipped: archive index pages</h2>
@@ -2539,7 +2561,7 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
   //
   // S04f is marked complete to skip it from the active queue — it is deferred
   // to post-S12 cleanup (see its prompt).
-  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04","R1-02","R1-03","R1-05"]
+  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04","R1-02","R1-03","R1-05","R1-06"]
     .reduce((acc, id) => { acc[id] = { done: true }; return acc; }, {});
 
   // ── Next-up recommendation ────────────────────────────────────────────
