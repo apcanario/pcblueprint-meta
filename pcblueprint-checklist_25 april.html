@@ -1991,6 +1991,26 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
     <div class="pane-content">
       <p style="font-size: 14px; color: var(--text-faint); margin-bottom: 16px;">📒 Out-of-scope work done outside the numbered sessions. Why this exists: the numbered sessions assume a working prod deploy + in-sync archive + stable infra. The 2026-04-25 reconciliation found those assumptions were not met, which triggered a cascade of unplanned fixes. Logging here so future sessions can see the full history. Going forward, entries include <code>HH:MM</code> alongside the date.</p>
 
+      <div class="tile" id="cl-2026-05-03-r1-07-shipped" data-anchor data-anchor-label="🚀 R1-07 shipped: search + tag filter — closes R1's archive-browsing track">
+        <div class="tile-date">2026-05-03 ~00:54 UTC</div>
+        <h2>🚀 R1-07 shipped: search + tag filter</h2>
+        <p><strong>Increment:</strong> The browsing loop is fully closed. Pedro opens <code>/search</code>, gets a form with a text input + a tag dropdown auto-populated from every <code>tags_applied: [...]</code> across the archive (nine indexers covering everything R1-05/06 surfaced). Type a phrase, pick a tag, or both — the AND of the two narrows the set. Each hit renders title + 160-char snippet around the match + source date + tag chips that re-link to <code>/search?tag=&lt;tag&gt;</code>. Tag chips on R1-06 detail pages now go somewhere real, both directions of the loop closed.</p>
+        <p><strong>Trade-offs accepted:</strong></p>
+        <ul>
+          <li>Re-indexes on every request — fine for personal-use traffic, revisit if R1-08 ever sees real load (would memoise the index and invalidate on <code>git pull</code>).</li>
+          <li>Case-insensitive substring with diacritic stripping (reused <code>normalize()</code> from the prior code) — no stemming, no fuzzy match. Good for known-item lookup, weak for "phrases I half-remember".</li>
+          <li>Tag matching is exact equality — no synonyms or hierarchy.</li>
+          <li>Existing JSON contract preserved (with <code>tag</code> added). Old API clients unchanged.</li>
+        </ul>
+        <p><strong>PR:</strong> <a href="https://github.com/apcanario/pcblueprint-api/pull/36"><code>pcblueprint-api#36</code></a> (squash-merged at <code>2026-05-03 00:53 UTC</code>) + the docs(changelog) follow-up PR opening alongside this tile.</p>
+        <p><strong>Downstream-impact triage:</strong></p>
+        <ul>
+          <li><code>R1-08</code> — Public deploy: no change. No new env vars.</li>
+          <li><code>R1-09</code> — Observability: <strong>worth a nice-to-have.</strong> Search latency + zero-result queries are useful signals to surface in whatever logging/metrics R1-09 lands. Not a scope blocker.</li>
+        </ul>
+        <p><strong>Phase B complete:</strong> auto-mode 3/3 done. R1-05 → R1-06 → R1-07 chained through end-to-end without a human gate, every implementation PR + every docs(changelog) follow-up auto-merged on green CI. Auth track (R1-01..R1-03) and archive-browsing track (R1-04..R1-07) both shut. Remaining R1: deploy (R1-08) + observability (R1-09).</p>
+      </div>
+
       <div class="tile" id="cl-2026-05-03-r1-06-shipped" data-anchor data-anchor-label="🚀 R1-06 shipped: per-record detail pages (markdown + tables + binary downloads)">
         <div class="tile-date">2026-05-03 ~00:46 UTC</div>
         <h2>🚀 R1-06 shipped: per-record detail pages</h2>
@@ -2561,7 +2581,7 @@ S16 (Observability) — can run any time after S06a/b</code></pre>
   //
   // S04f is marked complete to skip it from the active queue — it is deferred
   // to post-S12 cleanup (see its prompt).
-  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04","R1-02","R1-03","R1-05","R1-06"]
+  const COMPLETED_SESSIONS = ["S00","S01","S02a","S02b","S03a","S03b","S04a","S04b","S04c","S04d","S04e","S04f","S04g","S04h","S05a","S05b","S05c","S06a","R1-01","R1-04","R1-02","R1-03","R1-05","R1-06","R1-07"]
     .reduce((acc, id) => { acc[id] = { done: true }; return acc; }, {});
 
   // ── Next-up recommendation ────────────────────────────────────────────
